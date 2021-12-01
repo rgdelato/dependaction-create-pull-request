@@ -76,18 +76,21 @@ const { packages } = JSON.parse(JSON.parse(process.argv[2]));
 updateAllDependencies();
 
 async function updateAllDependencies(path = "") {
+  const workspace = process.env["GITHUB_WORKSPACE"];
+  const fullPath = path ? `${workspace}/${path}` : workspace;
+
   const dependencyGroups = [
     "dependencies",
     "devDependencies",
     "peerDependencies",
   ];
 
-  const files = fs.readdirSync(`${workspace}/${path}`, { withFileTypes: true });
+  const files = fs.readdirSync(fullPath, { withFileTypes: true });
 
   for (const directoryEntry of files) {
     if (directoryEntry.name === "package.json") {
       const packageJSON = JSON.parse(
-        fs.readFileSync(`${workspace}/${path}/${directoryEntry.name}`, "utf8")
+        fs.readFileSync(`${fullPath}/${directoryEntry.name}`, "utf8")
       );
 
       for (const packageData of packages) {
@@ -115,7 +118,7 @@ async function updateAllDependencies(path = "") {
       directoryEntry.name === "packages"
     ) {
       const packagesDirectoryFiles = fs.readdirSync(
-        `${workspace}/${path}/${directoryEntry.name}`,
+        `${fullPath}/${directoryEntry.name}`,
         {
           withFileTypes: true,
         }
@@ -124,7 +127,7 @@ async function updateAllDependencies(path = "") {
       for (const packagesDirectoryEntry of packagesDirectoryFiles) {
         const packageJSON = JSON.parse(
           fs.readFileSync(
-            `${workspace}/${path}/${directoryEntry.name}/${packagesDirectoryEntry.name}/package.json`,
+            `${fullPath}/${directoryEntry.name}/${packagesDirectoryEntry.name}/package.json`,
             "utf8"
           )
         );
@@ -138,7 +141,7 @@ async function updateAllDependencies(path = "") {
               packageJSON[dependencyGroup][packageName]
             ) {
               await updatePackageDependency(
-                `${workspace}/${path}/${directoryEntry.name}/${packagesDirectoryEntry.name}`,
+                `${fullPath}/${directoryEntry.name}/${packagesDirectoryEntry.name}`,
                 dependencyGroup,
                 packageName,
                 getUpdatedVersion(
@@ -168,9 +171,7 @@ function getUpdatedVersion(current, latest) {
 async function updatePackageDependency(path, dependencyGroup, key, value) {
   try {
     console.log(`Updating ${key} (${dependencyGroup}) in ${path}...`);
-    await exec(
-      `cd ${workspace}/${path} && npm pkg set ${dependencyGroup}.${key}=${value}`
-    );
+    await exec(`cd ${path} && npm pkg set ${dependencyGroup}.${key}=${value}`);
   } catch (err) {
     console.error(err);
   }
