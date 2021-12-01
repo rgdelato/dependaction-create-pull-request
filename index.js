@@ -5,6 +5,8 @@ const exec = util.promisify(require("child_process").exec);
 const workspace = process.env["GITHUB_WORKSPACE"];
 const { packages } = JSON.parse(process.argv[2]);
 
+console.log("packages:", typeof packages, packages);
+
 updateAllDependencies();
 
 async function updateAllDependencies(path = "") {
@@ -22,9 +24,9 @@ async function updateAllDependencies(path = "") {
         fs.readFileSync(`${workspace}/${path}/${directoryEntry.name}`, "utf8")
       );
 
-      for (const package of packages) {
+      for (const packageData of packages) {
         for (const dependencyGroup of dependencyGroups) {
-          const { name: packageName, latestVersion } = package;
+          const { name: packageName, latestVersion } = packageData;
 
           if (
             packageJSON[dependencyGroup] &&
@@ -61,9 +63,9 @@ async function updateAllDependencies(path = "") {
           )
         );
 
-        for (const package of packages) {
+        for (const packageData of packages) {
           for (const dependencyGroup of dependencyGroups) {
-            const { name: packageName, latestVersion } = package;
+            const { name: packageName, latestVersion } = packageData;
 
             if (
               packageJSON[dependencyGroup] &&
