@@ -168,7 +168,9 @@ function getUpdatedVersion(current, latest) {
 async function updatePackageDependency(path, dependencyGroup, key, value) {
   try {
     console.log(`Updating ${key} (${dependencyGroup}) in ${path}...`);
-    await exec(`cd ${path} && npm pkg set ${dependencyGroup}.${key}=${value}`);
+    await exec(
+      `cd ${workspace}/${path} && npm pkg set ${dependencyGroup}.${key}=${value}`
+    );
   } catch (err) {
     console.error(err);
   }
