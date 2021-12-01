@@ -21,7 +21,7 @@ runs:
         registry-url: "https://registry.npmjs.org"
     - run: node ${{ github.action_path }}/dist/index.js '${{ toJSON(inputs.matrix) }}'
       shell: bash
-    - run: ${inputs.install-command}
+    - run: ${{ inputs.install-command }}
       shell: bash
     - run: git status
       shell: bash
