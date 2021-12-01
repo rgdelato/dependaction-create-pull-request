@@ -7,7 +7,7 @@ inputs:
   install-command:
     description: "bash command to install"
     required: false
-    default: "npm i"
+    default: "npm i --legacy-peer-deps"
   labels:
     required: false
     default: "dependencies"
@@ -28,12 +28,12 @@ runs:
     - name: Create pull request
       uses: peter-evans/create-pull-request@v3
       with:
-        commit-message: Bump ${{ inputs.matrix.displayName }} from ${{ inputs.matrix.groupCurrentVersion }} to ${{ matrix.groupLatestVersion }}
-        title: Bump ${{ inputs.matrix.displayName }} from ${{ inputs.matrix.groupCurrentVersion }} to ${{ matrix.groupLatestVersion }}
-        body: ${{ inputs.matrix.prBody }}
+        commit-message: Bump ${{ fromJson(inputs.matrix).displayName }} from ${{ fromJson(inputs.matrix).groupCurrentVersion }} to ${{ fromJson(inputs.matrix).groupLatestVersion }}
+        title: Bump ${{ fromJson(inputs.matrix).displayName }} from ${{ fromJson(inputs.matrix).groupCurrentVersion }} to ${{ fromJson(inputs.matrix).groupLatestVersion }}
+        body: ${{ fromJson(inputs.matrix).prBody }}
         assignees: rgdelato
         reviewers: rgdelato
-        branch: bump-${{ inputs.matrix.slug }}
+        branch: bump-${{ fromJson(inputs.matrix).slug }}
         branch-suffix: short-commit-hash
-        labels: ${{ inputs.matrix.semverLabel }},dependaction,${{ inputs.labels }}
+        labels: ${{ fromJson(inputs.matrix).semverLabel }},dependaction,${{ inputs.labels }}
         delete-branch: true
