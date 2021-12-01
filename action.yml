@@ -19,7 +19,7 @@ runs:
       with:
         node-version: "16"
         registry-url: "https://registry.npmjs.org"
-    - run: node ${{ github.action_path }}/dist/index.js ${{ toJSON(inputs.matrix) }}
+    - run: node ${{ github.action_path }}/dist/index.js '${{ toJSON(inputs.matrix) }}'
       shell: bash
     - run: ${inputs.install-command}
       shell: bash

@@ -71,20 +71,7 @@ const util = __nccwpck_require__(837);
 const exec = util.promisify((__nccwpck_require__(81).exec));
 
 const workspace = process.env["GITHUB_WORKSPACE"];
-const packages = JSON.parse(process.argv[2]).packages;
-
-console.log("process.argv[2]:", process.argv[2]);
-console.log(
-  "JSON.parse(process.argv[2]):",
-  typeof JSON.parse(process.argv[2]),
-  JSON.parse(process.argv[2])
-);
-console.log(
-  "JSON.parse(process.argv[2]):",
-  typeof JSON.parse(JSON.parse(process.argv[2])),
-  JSON.parse(JSON.parse(process.argv[2]))
-);
-console.log("packages:", typeof packages, packages);
+const { packages } = JSON.parse(JSON.parse(process.argv[2]));
 
 updateAllDependencies();
 
