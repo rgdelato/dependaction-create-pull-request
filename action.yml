@@ -2,7 +2,7 @@ name: "Dependaction - Create Pull Requests"
 description: "Creates a pull request"
 inputs:
   matrix: # id of input
-    description: "Input from Group By action"
+    description: "Input from group-by action"
     required: true
   install-command:
     description: "bash command to install"
