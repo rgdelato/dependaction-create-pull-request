@@ -90,9 +90,9 @@ async function updateAllDependencies(path) {
 
 function getUpdatedVersion(current, latest) {
   // TODO: Handle peerDependencies such as "^16 || ^17"
-  if (current.indexOf("||") !== -1) {
-    return current;
-  }
+  // if (current.indexOf("||") !== -1) {
+  //   return latest;
+  // }
 
   const semverRangeMatch = current.match(/\D*/);
   const semverRange = (semverRangeMatch && semverRangeMatch[0]) || "";
