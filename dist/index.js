@@ -70,12 +70,11 @@ const fs = __nccwpck_require__(147);
 const util = __nccwpck_require__(837);
 const exec = util.promisify((__nccwpck_require__(81).exec));
 
-const workspace = process.env["GITHUB_WORKSPACE"];
 const { packages } = JSON.parse(JSON.parse(process.argv[2]));
 
 updateAllDependencies();
 
-async function updateAllDependencies(path = "") {
+async function updateAllDependencies(path) {
   const workspace = process.env["GITHUB_WORKSPACE"];
   const fullPath = path ? `${workspace}/${path}` : workspace;
 
@@ -102,7 +101,7 @@ async function updateAllDependencies(path = "") {
             packageJSON[dependencyGroup][packageName]
           ) {
             await updatePackageDependency(
-              path,
+              fullPath,
               dependencyGroup,
               packageName,
               getUpdatedVersion(
