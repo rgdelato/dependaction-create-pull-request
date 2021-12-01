@@ -1,0 +1,39 @@
+name: "Dependaction - Create Pull Requests"
+description: "Creates a pull request"
+inputs:
+  matrix: # id of input
+    description: "Input from Group By action"
+    required: true
+  install-command:
+    description: "bash command to install"
+    required: false
+    default: "npm i"
+  labels:
+    required: false
+    default: "dependencies"
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: "16"
+        registry-url: "https://registry.npmjs.org"
+    - run: node ${{ github.action_path }}/dist/index.js '${{ toJSON(inputs.matrix) }}'
+      shell: bash
+    - run: ${inputs.install-command}
+      shell: bash
+    - run: git status
+      shell: bash
+    - name: Create pull request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        commit-message: Bump ${{ inputs.matrix.displayName }} from ${{ inputs.matrix.groupCurrentVersion }} to ${{ matrix.groupLatestVersion }}
+        title: Bump ${{ inputs.matrix.displayName }} from ${{ inputs.matrix.groupCurrentVersion }} to ${{ matrix.groupLatestVersion }}
+        body: ${{ inputs.matrix.prBody }}
+        assignees: rgdelato
+        reviewers: rgdelato
+        branch: bump-${{ inputs.matrix.slug }}
+        branch-suffix: short-commit-hash
+        labels: ${{ inputs.matrix.semverLabel }},dependaction,${{ inputs.labels }}
+        delete-branch: true
