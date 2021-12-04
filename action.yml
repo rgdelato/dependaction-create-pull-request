@@ -2,15 +2,32 @@ name: "Dependaction - Create Pull Requests"
 description: "Creates a pull request"
 inputs:
   matrix: # id of input
-    description: "Input from group-by action"
     required: true
   install-command:
-    description: "bash command to install"
     required: false
     default: "npm i --legacy-peer-deps"
+  reviewers:
+    required: false
+    default: ""
+  reviewers-major:
+    required: false
+    default: ""
+  reviewers-minor:
+    required: false
+    default: ""
+  reviewers-patch:
+    required: false
+    default: ""
   labels:
     required: false
-    default: "dependencies"
+    default: ""
+outputs:
+  data: # id of output
+    description: "Data for the pull request"
+    value: ${{ steps.script.outputs.data }}
+  reviewers: # id of output
+    description: "Reviewers depending on major/minor/patch version"
+    value: ${{ steps.reviewers.outputs.reviewers }}
 runs:
   using: "composite"
   steps:
@@ -19,11 +36,19 @@ runs:
       with:
         node-version: "16"
         registry-url: "https://registry.npmjs.org"
-    - run: node ${{ github.action_path }}/dist/index.js '${{ toJSON(inputs.matrix) }}'
+    - id: script
+      run: |
+        echo $(node ${{ github.action_path }}/dist/index.js '${{ toJSON(inputs.matrix) }}')
       shell: bash
-    - run: ${{ inputs.install-command }} || true
+    - run: |
+        ${{ inputs.install-command }} || true
+        git status
       shell: bash
-    - run: git status
+    - id: reviewers
+      run: |
+        if [ "${{ fromJson(inputs.matrix).semverLabel }}" == "major" ]; then echo "::set-output name=reviewers::${{ inputs.reviewers-major }}";
+        elif [ "${{ fromJson(inputs.matrix).semverLabel }}" == "minor" ]; then echo "::set-output name=reviewers::${{ inputs.reviewers-minor }}";
+        elif [ "${{ fromJson(inputs.matrix).semverLabel }}" == "patch" ]; then echo "::set-output name=reviewers::${{ inputs.reviewers-patch }}"; fi
       shell: bash
     - name: Create pull request
       uses: peter-evans/create-pull-request@v3
@@ -32,8 +57,10 @@ runs:
         title: Bump ${{ fromJson(inputs.matrix).displayName }} from ${{ fromJson(inputs.matrix).groupCurrentVersion }} to ${{ fromJson(inputs.matrix).groupLatestVersion }}
         body: ${{ fromJson(inputs.matrix).prBody }}
         assignees: rgdelato
-        reviewers: rgdelato
-        branch: bump-${{ fromJson(inputs.matrix).slug }}
-        branch-suffix: short-commit-hash
-        labels: ${{ fromJson(inputs.matrix).semverLabel }},dependaction,${{ inputs.labels }}
+        reviewers: ${{ inputs.reviewers }},${{ steps.reviewers.outputs.reviewers }}
+        branch: dependaction-${{ fromJson(inputs.matrix).hash }}
+        labels: |
+          dependaction
+          ${{ fromJson(inputs.matrix).semverLabel }}
+          ${{ inputs.labels }}
         delete-branch: true
