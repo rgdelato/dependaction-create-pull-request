@@ -6,6 +6,18 @@ inputs:
   install-command:
     required: false
     default: "npm i --legacy-peer-deps"
+  assignees:
+    required: false
+    default: ""
+  assignees-major:
+    required: false
+    default: ""
+  assignees-minor:
+    required: false
+    default: ""
+  assignees-patch:
+    required: false
+    default: ""
   reviewers:
     required: false
     default: ""
@@ -25,6 +37,9 @@ outputs:
   data: # id of output
     description: "Data for the pull request"
     value: ${{ steps.script.outputs.data }}
+  assignees: # id of output
+    description: "Assignees depending on major/minor/patch version"
+    value: ${{ steps.assignees.outputs.assignees }}
   reviewers: # id of output
     description: "Reviewers depending on major/minor/patch version"
     value: ${{ steps.reviewers.outputs.reviewers }}
@@ -44,6 +59,12 @@ runs:
         ${{ inputs.install-command }} || true
         git status
       shell: bash
+    - id: assignees
+      run: |
+        if [ "${{ fromJson(inputs.matrix).semverLabel }}" == "major" ]; then echo "::set-output name=assignees::${{ inputs.assignees-major }}";
+        elif [ "${{ fromJson(inputs.matrix).semverLabel }}" == "minor" ]; then echo "::set-output name=assignees::${{ inputs.assignees-minor }}";
+        elif [ "${{ fromJson(inputs.matrix).semverLabel }}" == "patch" ]; then echo "::set-output name=assignees::${{ inputs.assignees-patch }}"; fi
+      shell: bash
     - id: reviewers
       run: |
         if [ "${{ fromJson(inputs.matrix).semverLabel }}" == "major" ]; then echo "::set-output name=reviewers::${{ inputs.reviewers-major }}";
@@ -56,7 +77,7 @@ runs:
         commit-message: Bump ${{ fromJson(inputs.matrix).displayName }} from ${{ fromJson(inputs.matrix).groupCurrentVersion }} to ${{ fromJson(inputs.matrix).groupLatestVersion }}
         title: Bump ${{ fromJson(inputs.matrix).displayName }} from ${{ fromJson(inputs.matrix).groupCurrentVersion }} to ${{ fromJson(inputs.matrix).groupLatestVersion }}
         body: ${{ fromJson(inputs.matrix).prBody }}
-        assignees: rgdelato
+        assignees: ${{ inputs.assignees }},${{ steps.assignees.outputs.assignees }}
         reviewers: ${{ inputs.reviewers }},${{ steps.reviewers.outputs.reviewers }}
         branch: dependaction-${{ fromJson(inputs.matrix).hash }}
         labels: |
