@@ -1,6 +1,9 @@
 name: "Dependaction - Create Pull Requests"
 description: "Creates a pull request"
 inputs:
+  token:
+    required: false
+    default: ${{ github.token }}
   matrix: # id of input
     required: true
   install-command:
@@ -74,6 +77,7 @@ runs:
     - name: Create pull request
       uses: peter-evans/create-pull-request@v3
       with:
+        token: ${{ inputs.token }}
         commit-message: Bump ${{ fromJson(inputs.matrix).displayName }} from ${{ fromJson(inputs.matrix).groupCurrentVersion }} to ${{ fromJson(inputs.matrix).groupLatestVersion }}
         title: Bump ${{ fromJson(inputs.matrix).displayName }} from ${{ fromJson(inputs.matrix).groupCurrentVersion }} to ${{ fromJson(inputs.matrix).groupLatestVersion }}
         body: ${{ fromJson(inputs.matrix).prBody }}
