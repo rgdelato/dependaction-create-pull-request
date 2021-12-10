@@ -33,6 +33,18 @@ inputs:
   reviewers-patch:
     required: false
     default: ""
+  team-reviewers:
+    required: false
+    default: ""
+  team-reviewers-major:
+    required: false
+    default: ""
+  team-reviewers-minor:
+    required: false
+    default: ""
+  team-reviewers-patch:
+    required: false
+    default: ""
   labels:
     required: false
     default: ""
@@ -74,6 +86,12 @@ runs:
         elif [ "${{ fromJson(inputs.matrix).semverLabel }}" == "minor" ]; then echo "::set-output name=reviewers::${{ inputs.reviewers-minor }}";
         elif [ "${{ fromJson(inputs.matrix).semverLabel }}" == "patch" ]; then echo "::set-output name=reviewers::${{ inputs.reviewers-patch }}"; fi
       shell: bash
+    - id: team-reviewers
+      run: |
+        if [ "${{ fromJson(inputs.matrix).semverLabel }}" == "major" ]; then echo "::set-output name=team-reviewers::${{ inputs.team-reviewers-major }}";
+        elif [ "${{ fromJson(inputs.matrix).semverLabel }}" == "minor" ]; then echo "::set-output name=team-reviewers::${{ inputs.team-reviewers-minor }}";
+        elif [ "${{ fromJson(inputs.matrix).semverLabel }}" == "patch" ]; then echo "::set-output name=team-reviewers::${{ inputs.team-reviewers-patch }}"; fi
+      shell: bash
     - name: Create pull request
       uses: peter-evans/create-pull-request@v3
       with:
@@ -83,6 +101,7 @@ runs:
         body: ${{ fromJson(inputs.matrix).prBody }}
         assignees: ${{ inputs.assignees }},${{ steps.assignees.outputs.assignees }}
         reviewers: ${{ inputs.reviewers }},${{ steps.reviewers.outputs.reviewers }}
+        team-reviewers: ${{ inputs.team-reviewers }},${{ steps.team-reviewers.outputs.team-reviewers }}
         branch: dependaction-${{ fromJson(inputs.matrix).hash }}
         labels: |
           dependaction
