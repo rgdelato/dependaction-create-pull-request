@@ -92,7 +92,8 @@ runs:
         elif [ "${{ fromJson(inputs.matrix).semverLabel }}" == "minor" ]; then echo "::set-output name=team-reviewers::${{ inputs.team-reviewers-minor }}";
         elif [ "${{ fromJson(inputs.matrix).semverLabel }}" == "patch" ]; then echo "::set-output name=team-reviewers::${{ inputs.team-reviewers-patch }}"; fi
       shell: bash
-    - name: Create pull request
+    - id: create-pull-request
+      name: Create pull request
       uses: peter-evans/create-pull-request@v3
       with:
         token: ${{ inputs.token }}
@@ -108,3 +109,10 @@ runs:
           ${{ fromJson(inputs.matrix).semverLabel }}
           ${{ inputs.labels }}
         delete-branch: true
+    - id: approve-pull-request
+      name: Auto-approve pull request
+      if: steps.create-pull-request.outputs.pull-request-operation == 'created'
+      uses: juliangruber/approve-pull-request-action@v1
+      with:
+        github-token: ${{ github.token }}
+        number: ${{ steps.create-pull-request.outputs.pull-request-number }}
