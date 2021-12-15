@@ -9,7 +9,7 @@ inputs:
   install-command:
     required: false
     default: "npm i --legacy-peer-deps"
-  sleep:
+  approve-delay:
     required: false
     default: "0"
   assignees:
@@ -114,7 +114,7 @@ runs:
           ${{ inputs.labels }}
         delete-branch: true
     - id: sleep
-      run: sleep ${{ inputs.sleep }}
+      run: sleep ${{ inputs.approve-delay }}
       shell: bash
     - id: approve-pull-request
       name: Auto-approve pull request
