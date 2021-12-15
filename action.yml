@@ -9,6 +9,9 @@ inputs:
   install-command:
     required: false
     default: "npm i --legacy-peer-deps"
+  sleep:
+    required: false
+    default: "0"
   assignees:
     required: false
     default: ""
@@ -70,7 +73,8 @@ runs:
       run: |
         echo $(node ${{ github.action_path }}/dist/index.js '${{ toJSON(inputs.matrix) }}')
       shell: bash
-    - run: |
+    - id: install
+      run: |
         ${{ inputs.install-command }} || true
         git status
       shell: bash
@@ -109,6 +113,9 @@ runs:
           ${{ fromJson(inputs.matrix).semverLabel }}
           ${{ inputs.labels }}
         delete-branch: true
+    - id: sleep
+      run: sleep ${{ inputs.sleep }}
+      shell: bash
     - id: approve-pull-request
       name: Auto-approve pull request
       if: steps.create-pull-request.outputs.pull-request-operation == 'created'
