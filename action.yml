@@ -110,7 +110,6 @@ runs:
         branch: dependaction-${{ fromJson(inputs.matrix).hash }}
         labels: |
           dependaction
-          ${{ fromJson(inputs.matrix).semverLabel }}
           ${{ inputs.labels }}
         delete-branch: true
     - id: sleep
