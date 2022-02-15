@@ -9,9 +9,6 @@ inputs:
   install-command:
     required: false
     default: "npm i --legacy-peer-deps"
-  delay-approve:
-    required: false
-    default: "0"
   assignees:
     required: false
     default: ""
@@ -105,15 +102,18 @@ runs:
         title: Bump ${{ fromJson(inputs.matrix).displayName }} from ${{ fromJson(inputs.matrix).groupCurrentVersion }} to ${{ fromJson(inputs.matrix).groupLatestVersion }}
         body: ${{ fromJson(inputs.matrix).prBody }}
         assignees: ${{ inputs.assignees }},${{ steps.assignees.outputs.assignees }}
-        reviewers: ${{ inputs.reviewers }},${{ steps.reviewers.outputs.reviewers }}
-        team-reviewers: ${{ inputs.team-reviewers }},${{ steps.team-reviewers.outputs.team-reviewers }}
+        # reviewers: ${{ inputs.reviewers }},${{ steps.reviewers.outputs.reviewers }}
+        # team-reviewers: ${{ inputs.team-reviewers }},${{ steps.team-reviewers.outputs.team-reviewers }}
         branch: dependaction-${{ fromJson(inputs.matrix).hash }}
         labels: |
           dependaction
           ${{ inputs.labels }}
         delete-branch: true
-    - id: sleep
-      run: sleep ${{ inputs.delay-approve }}
+    - id: request-reviewers
+      name: Request Reviewers
+      if: steps.create-pull-request.outputs.pull-request-operation == 'created'
+      run: |
+        echo $(node ${{ github.action_path }}/dist/request-reviewers.js '${{ inputs.token }}' '${{ steps.create-pull-request.outputs.pull-request-number }}' '${{ inputs.reviewers }}' '${{ inputs.team-reviewers }}')
       shell: bash
     - id: approve-pull-request
       name: Auto-approve pull request

@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "build": "ncc build index.js --license licenses.txt",
+    "build": "ncc build request-reviewers.js && mv dist/index.js dist/request-reviewers.js && ncc build index.js --license licenses.txt",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/rgdelato/dependaction-create-pull-request/issues"
   },
-  "homepage": "https://github.com/rgdelato/dependaction-create-pull-request#readme"
+  "homepage": "https://github.com/rgdelato/dependaction-create-pull-request#readme",
+  "dependencies": {
+    "@octokit/core": "^3.5.1"
+  }
 }
