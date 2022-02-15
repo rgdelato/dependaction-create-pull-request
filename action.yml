@@ -113,7 +113,7 @@ runs:
       name: Request Reviewers
       if: steps.create-pull-request.outputs.pull-request-operation == 'created'
       run: |
-        echo $(node ${{ github.action_path }}/dist/request-reviewers.js '${{ inputs.token }}' '${{ steps.create-pull-request.outputs.pull-request-number }}' '${{ inputs.reviewers }}' '${{ inputs.team-reviewers }}')
+        echo $(node ${{ github.action_path }}/dist/request-reviewers.js '${{ inputs.token }}' '${{ steps.create-pull-request.outputs.pull-request-number }}' '${{ inputs.reviewers }},${{ steps.reviewers.outputs.reviewers }}' '${{ inputs.team-reviewers }},${{ steps.team-reviewers.outputs.team-reviewers }}')
       shell: bash
     - id: approve-pull-request
       name: Auto-approve pull request
