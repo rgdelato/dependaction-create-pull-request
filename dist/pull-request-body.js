@@ -7017,8 +7017,6 @@ const octokit = new Octokit({ auth: token });
     try {
       const releaseResponse = await getReleaseByVersion(owner, repo, version);
 
-      console.log(releaseResponse);
-
       if (releaseResponse.body) {
         body += `<details>
 <summary>Release notes</summary>
