@@ -22,7 +22,7 @@ const octokit = new Octokit({ auth: token });
       try {
         const releaseResponse = await getReleaseByVersion(owner, repo, version);
 
-        if (releaseResponse.body) {
+        if (releaseResponse?.body) {
           body += `
 
 <details>
@@ -31,8 +31,11 @@ const octokit = new Octokit({ auth: token });
 <blockquote>
 
 `;
-          body += `# ${releaseResponse.name}
+          if (releaseResponse?.name || releaseResponse?.tag_name) {
+            body += `# ${releaseResponse?.name || releaseResponse?.tag_name}
 `;
+          }
+
           body += releaseResponse.body;
           body += `
   
@@ -40,12 +43,14 @@ const octokit = new Octokit({ auth: token });
   </details>`;
         }
 
-        const tag = releaseResponse.tag_name;
+        const tag = releaseResponse?.tag_name;
 
-        const changelogResponse = await getRootChangelog(owner, repo, tag);
-        body += `
-
+        if (tag) {
+          const changelogResponse = await getRootChangelog(owner, repo, tag);
+          body += `
+  
 <a href="${changelogResponse.html_url}"><code>${owner}/${repo}</code>'s CHANGELOG.md</a>`;
+        }
       } catch (e) {
         console.error(e?.response);
       }
