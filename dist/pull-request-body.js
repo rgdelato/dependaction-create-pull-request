@@ -7006,34 +7006,46 @@ const octokit = new Octokit({ auth: token });
 (async function () {
   let body = "";
 
+  const versionsKeyedByURL = getVersionsKeyedByURL(matrix.packages);
+  const hasOnlyOneURL = Object.keys(versionsKeyedByURL).length <= 1;
+
   body += listOfPackages(matrix.packages);
 
-  const versionsKeyedByURL = getVersionsKeyedByURL(matrix.packages);
+  if (hasOnlyOneURL) {
+    for (const [url, version] of Object.entries(versionsKeyedByURL)) {
+      const owner = url.split("/").at(-2);
+      const repo = url.split("/").at(-1);
 
-  for (const [url, version] of Object.entries(versionsKeyedByURL)) {
-    const owner = url.split("/").at(-2);
-    const repo = url.split("/").at(-1);
+      try {
+        const releaseResponse = await getReleaseByVersion(owner, repo, version);
 
-    try {
-      const releaseResponse = await getReleaseByVersion(owner, repo, version);
+        if (releaseResponse.body) {
+          body += `
 
-      if (releaseResponse.body) {
-        body += `<details>
+<details>
 <summary>Release notes</summary>
 <p><em>Sourced from <a href="${releaseResponse.html_url}"><code>${owner}/${repo}</code>'s releases</a>.</em></p>
 <blockquote>
 
 `;
-        body += `# ${releaseResponse.name}
+          body += `# ${releaseResponse.name}
 `;
-        body += releaseResponse.body;
+          body += releaseResponse.body;
+          body += `
+  
+  </blockquote>
+  </details>`;
+        }
+
+        const tag = releaseResponse.tag_name;
+
+        const changelogResponse = await getRootChangelog(owner, repo, tag);
         body += `
 
-</blockquote>
-</details>`;
+<a href="${changelogResponse.html_url}"><code>${owner}/${repo}</code>'s CHANGELOG.md</a>`;
+      } catch (e) {
+        console.error(e?.response);
       }
-    } catch (e) {
-      console.error(e?.response);
     }
   }
 
@@ -7048,6 +7060,24 @@ function getVersionsKeyedByURL(packages) {
   return packagesWithoutTypes.reduce((acc, { latestVersion, url }) => {
     return { ...acc, [url]: latestVersion };
   }, {});
+}
+
+function listOfPackages(packages) {
+  let text = "";
+
+  for (const { name, currentVersion, latestVersion, url } of packages) {
+    if (url) {
+      text += `${
+        packages.length > 1 ? "- " : ""
+      }Bumps [${name}](${url}) from ${currentVersion} to ${latestVersion}\n`;
+    } else {
+      text += `${
+        packages.length > 1 ? "- " : ""
+      }Bumps ${name} from ${currentVersion} to ${latestVersion}\n`;
+    }
+  }
+
+  return text;
 }
 
 async function getReleaseByVersion(owner, repo, version) {
@@ -7084,22 +7114,34 @@ async function getReleaseByTag(owner, repo, tag) {
   }
 }
 
-function listOfPackages(packages) {
-  let text = "";
+async function getRootChangelog(owner, repo, tag) {
+  const possiblePaths = [`CHANGELOG.md`];
 
-  for (const { name, currentVersion, latestVersion, url } of packages) {
-    if (url) {
-      text += `${
-        packages.length > 1 ? "- " : ""
-      }Bumps [${name}](${url}) from ${currentVersion} to ${latestVersion}\n`;
-    } else {
-      text += `${
-        packages.length > 1 ? "- " : ""
-      }Bumps ${name} from ${currentVersion} to ${latestVersion}\n`;
+  for (const path of possiblePaths) {
+    const response = await getFileByPath(owner, repo, path, tag);
+
+    if (response?.status === 200) {
+      return response?.data;
     }
   }
+}
 
-  return text;
+async function getFileByPath(owner, repo, path, ref = null) {
+  try {
+    const response = await octokit.request(
+      "GET /repos/{owner}/{repo}/contents/{path}",
+      {
+        owner,
+        repo,
+        path,
+        ref,
+      }
+    );
+
+    return response;
+  } catch (e) {
+    return e?.response;
+  }
 }
 
 })();
