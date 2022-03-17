@@ -7034,7 +7034,7 @@ const testBody = `- Bumps [react](https://github.com/facebook/react) from 15.7.0
 
 </details>`;
 
-core.setOutput("body", JSON.stringify(testBody, null, 2));
+core.setOutput("body", testBody);
 
 })();
 
