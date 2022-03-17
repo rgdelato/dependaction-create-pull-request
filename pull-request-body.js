@@ -54,12 +54,7 @@ function allUniqueURLs(packages) {
 function listOfPackages(packages) {
   let text = "";
 
-  for (const {
-    name,
-    currentVersion,
-    latestVersion,
-    url,
-  } of packagesWithMetadata) {
+  for (const { name, currentVersion, latestVersion, url } of packages) {
     if (url) {
       text += `${
         packages.length > 1 ? "- " : ""
