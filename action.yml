@@ -93,6 +93,10 @@ runs:
         elif [ "${{ fromJson(inputs.matrix).semverLabel }}" == "minor" ]; then echo "::set-output name=team-reviewers::${{ inputs.team-reviewers-minor }}";
         elif [ "${{ fromJson(inputs.matrix).semverLabel }}" == "patch" ]; then echo "::set-output name=team-reviewers::${{ inputs.team-reviewers-patch }}"; fi
       shell: bash
+    - id: pull-request-body
+      run: |
+        echo $(node ${{ github.action_path }}/dist/pull-request-body.js '${{ inputs.token }}' '${{ toJSON(inputs.matrix) }}')
+      shell: bash
     - id: create-pull-request
       name: Create pull request
       uses: peter-evans/create-pull-request@v3
@@ -100,7 +104,7 @@ runs:
         token: ${{ inputs.token }}
         commit-message: Bump ${{ fromJson(inputs.matrix).displayName }} from ${{ fromJson(inputs.matrix).groupCurrentVersion }} to ${{ fromJson(inputs.matrix).groupLatestVersion }}
         title: Bump ${{ fromJson(inputs.matrix).displayName }} from ${{ fromJson(inputs.matrix).groupCurrentVersion }} to ${{ fromJson(inputs.matrix).groupLatestVersion }}
-        body: ${{ fromJson(inputs.matrix).prBody }}
+        body: ${{ steps.pull-request-body.outputs.body }}
         assignees: ${{ inputs.assignees }},${{ steps.assignees.outputs.assignees }}
         # reviewers: ${{ inputs.reviewers }},${{ steps.reviewers.outputs.reviewers }}
         # team-reviewers: ${{ inputs.team-reviewers }},${{ steps.team-reviewers.outputs.team-reviewers }}

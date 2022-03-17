@@ -75,7 +75,7 @@ const { packages } = JSON.parse(JSON.parse(process.argv[2]));
 updateAllDependencies();
 
 async function updateAllDependencies(path) {
-  const workspace = process.env["GITHUB_WORKSPACE"];
+  const workspace = process.env.GITHUB_WORKSPACE;
   const fullPath = path ? `${workspace}/${path}` : workspace;
 
   const dependencyGroups = [

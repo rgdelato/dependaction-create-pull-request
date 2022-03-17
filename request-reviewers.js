@@ -22,11 +22,11 @@ const team_reviewers = getStringAsArray(process.argv[5]);
         team_reviewers,
       }
     );
+
+    // console.log(JSON.stringify(response?.data, null, 2));
   } catch (e) {
     console.error(e);
   }
-
-  console.log(JSON.stringify(response?.data, null, 2));
 })();
 
 /**

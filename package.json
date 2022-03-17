@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "build": "ncc build request-reviewers.js && mv dist/index.js dist/request-reviewers.js && ncc build index.js --license licenses.txt",
+    "build": "ncc build pull-request-body.js && mv dist/index.js dist/pull-request-body.js && ncc build request-reviewers.js && mv dist/index.js dist/request-reviewers.js && ncc build index.js --license licenses.txt",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/rgdelato/dependaction-create-pull-request#readme",
   "dependencies": {
+    "@actions/core": "^1.6.0",
     "@octokit/core": "^3.5.1"
   }
 }
