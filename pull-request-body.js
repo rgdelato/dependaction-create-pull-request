@@ -46,7 +46,7 @@ const octokit = new Octokit({ auth: token });
         }
 
         if (changelogResponse?.html_url) {
-          body += `\n\nChangelog: <em><a href="${changelogResponse.html_url}"><code>${owner}/${repo}</code>'s root CHANGELOG.md</a></em>`;
+          body += `\n\n<em><code>${owner}/${repo}</code>'s top-level, root <a href="${changelogResponse.html_url}">CHANGELOG.md</a></em>`;
         }
       } catch (e) {
         console.error(e?.response || e);
