@@ -4,32 +4,6 @@ const { Octokit } = require("@octokit/core");
 const token = process.argv[2];
 const matrix = JSON.parse(JSON.parse(process.argv[3]));
 
-// const token = "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";
-// const matrix = {
-//   packages: [
-//     {
-//       name: "jest",
-//       unscopedPackageName: "jest",
-//       currentVersion: "27.2.0",
-//       latestVersion: "27.5.1",
-//       url: "https://github.com/facebook/jest",
-//     },
-//     {
-//       name: "@types/jest",
-//       unscopedPackageName: "jest",
-//       currentVersion: "27.0.1",
-//       latestVersion: "27.4.1",
-//       url: "https://github.com/DefinitelyTyped/DefinitelyTyped",
-//     },
-//   ],
-//   scope: "",
-//   groupCurrentVersion: "27.2.0",
-//   groupLatestVersion: "27.5.1",
-//   semverLabel: "minor",
-//   displayName: "jest",
-//   hash: "ZYYpsF",
-// };
-
 const octokit = new Octokit({ auth: token });
 
 (async function () {
@@ -44,20 +18,20 @@ const octokit = new Octokit({ auth: token });
     const repo = url.split("/").at(-1);
 
     try {
-      const { body: releaseBody } = await getReleaseByVersion(
-        owner,
-        repo,
-        version
-      );
+      const releaseResponse = await getReleaseByVersion(owner, repo, version);
 
-      if (releaseBody) {
+      console.log(releaseResponse);
+
+      if (releaseResponse.body) {
         body += `<details>
 <summary>Release notes</summary>
-<p><em>Sourced from <a href="${url}"><code>${owner}/${repo}</code>'s releases</a>.</em></p>
+<p><em>Sourced from <a href="${releaseResponse.html_url}"><code>${owner}/${repo}</code>'s releases</a>.</em></p>
 <blockquote>
 
 `;
-        body += releaseBody;
+        body += `# ${releaseResponse.name}
+`;
+        body += releaseResponse.body;
         body += `
 
 </blockquote>
