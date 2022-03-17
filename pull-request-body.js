@@ -6,6 +6,9 @@ const matrix = JSON.parse(JSON.parse(process.argv[3]));
 
 const octokit = new Octokit({ auth: token });
 
+// TODO: This currently only works on PRs where all packages are sourced from
+//       the same GitHub repo
+
 (async function () {
   let body = "";
 
@@ -23,23 +26,16 @@ const octokit = new Octokit({ auth: token });
         const releaseResponse = await getReleaseByVersion(owner, repo, version);
 
         if (releaseResponse?.body) {
-          body += `
-
-<details>
-<summary>Release notes</summary>
+          body += `\n\n<details>
+<summary>Latest release notes</summary>
 <p><em>Sourced from <a href="${releaseResponse.html_url}"><code>${owner}/${repo}</code>'s releases</a>.</em></p>
-<blockquote>
-
-`;
+<blockquote>\n\n`;
           if (releaseResponse?.name || releaseResponse?.tag_name) {
-            body += `# ${releaseResponse?.name || releaseResponse?.tag_name}
-`;
+            body += `# ${releaseResponse?.name || releaseResponse?.tag_name}\n`;
           }
 
           body += releaseResponse.body;
-          body += `
-  
-  </blockquote>
+          body += `\n\n</blockquote>
   </details>`;
         }
 
@@ -47,9 +43,7 @@ const octokit = new Octokit({ auth: token });
 
         if (tag) {
           const changelogResponse = await getRootChangelog(owner, repo, tag);
-          body += `
-  
-<a href="${changelogResponse.html_url}"><code>${owner}/${repo}</code>'s CHANGELOG.md</a>`;
+          body += `\n\n<a href="${changelogResponse.html_url}"><code>${owner}/${repo}</code>'s CHANGELOG.md</a>`;
         }
       } catch (e) {
         console.error(e?.response);
